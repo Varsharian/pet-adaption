@@ -90,10 +90,12 @@ function validateSignup(){
 }
 
 function googleSignIn(){
-    // This will be handled by Firebase in login.html
-    // Placeholder for pages without Firebase
+    // Simple localStorage-based authentication for demo
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("userEmail", "user@gmail.com");
+    localStorage.setItem("userName", "Google User");
+    
+    alert("Login successful! Welcome to PawFind.");
     
     setTimeout(function() {
         window.location.href = "index.html";
