@@ -19,24 +19,28 @@
       <ul class="navbar-nav ms-auto align-items-lg-center">
         <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
         <li class="nav-item"><a class="nav-link" href="about.html">About</a></li>
-        <li class="nav-item"><a class="nav-link" href="pets.html">Pets</a></li>
+        <li class="nav-item"><a class="nav-link" href="dogs.html">Dogs</a></li>
+        <li class="nav-item"><a class="nav-link" href="details.html">Dog Details</a></li>
+        <li class="nav-item"><a class="nav-link" href="stories.html">Stories</a></li>
+        <li class="nav-item"><a class="nav-link" href="caretips.html">Care Tips</a></li>
         <li class="nav-item"><a class="nav-link" href="adopt.html">Adopt</a></li>
         <li class="nav-item"><a class="nav-link" href="contact.html">Contact</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="logout(); return false;">Logout</a></li>
       </ul>
       <button id="themeToggle" class="btn btn-outline-light btn-sm ms-lg-3" type="button">Dark Mode</button>
     </div>
   </div>
 </nav>
 
-<header class="hero d-flex align-items-center text-white">
+<header class="hero d-flex align-items-center">
   <div class="container py-6">
     <div class="row">
       <div class="col-lg-7">
 
-        <h1 class="display-4 fw-bold">Your Pet Adoption Paradise</h1>
-        <p class="lead mb-4">Connecting caring families with pets looking for safe, loving homes.</p>
-        <a href="pets.html" class="btn btn-warning btn-lg me-2">View pets</a>
-        <a href="adopt.html" class="btn btn-outline-light btn-lg">Start Adoption</a>
+        <h1 class="display-4 fw-bold text-dark">Your Pet Adoption Paradise</h1>
+        <p class="lead mb-4 text-dark">Connecting caring families with pets looking for safe, loving homes.</p>
+        <a href="dogs.html" class="btn btn-warning btn-lg me-2">View pets</a>
+        <a href="adopt.html" class="btn btn-outline-dark btn-lg">Start Adoption</a>
       </div>
     </div>
   </div>
@@ -79,7 +83,7 @@
   <div class="container">
     <div class="row align-items-center">
       <div class="col-md-6 mb-4 mb-md-0">
-        <img src="Pawsitively Adorable_ Unleash Your Love for Pets!.jpeg" alt="Happy adopted pets" class="img-fluid rounded shadow-sm">
+        <img src="pawsitively-adorable.jpeg" alt="Happy adopted pets" class="img-fluid rounded shadow-sm">
       </div>
       <div class="col-md-6">
         <h2>Make a life-changing match</h2>
@@ -142,6 +146,46 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Firebase SDK -->
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  import { getStorage } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDS1ONYkiCi-17FCPfZpjsXA2Nn_csdx7Q",
+    authDomain: "pet-adoption-ad74b.firebaseapp.com",
+    projectId: "pet-adoption-ad74b",
+    storageBucket: "pet-adoption-ad74b.firebasestorage.app",
+    messagingSenderId: "73451343038",
+    appId: "1:73451343038:web:8c86cf944277fabbd822ef",
+    measurementId: "G-J27W9XPS0T"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const storage = getStorage(app);
+
+  // Make Firebase services available globally
+  window.firebase = {
+    app,
+    analytics,
+    auth,
+    db,
+    storage
+  };
+
+  console.log("Firebase initialized successfully!");
+</script>
+
 <script src="script.js"></script>
 </body>
 </html>

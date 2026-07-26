@@ -155,5 +155,96 @@
 <script src="script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+<script>
+// Dynamic dog details based on URL parameter
+const dogData = {
+  buddy: {
+    name: "Buddy",
+    breed: "Labrador Retriever",
+    age: "2 Years",
+    gender: "Male",
+    weight: "28 Kg",
+    image: "Nanook.jpeg",
+    description: "Buddy is a friendly and playful Labrador who loves spending time outdoors, enjoying fetch, and sharing affection with his family.",
+    traits: ["Friendly", "Playful", "Great with kids"],
+    highlights: [
+      "Vaccinated and healthy with a cheerful personality.",
+      "Enjoys walks, playtime, and cuddles after a long day.",
+      "Perfect match for families looking for a loyal companion."
+    ]
+  },
+  molly: {
+    name: "Molly",
+    breed: "Golden Retriever",
+    age: "3 Years",
+    gender: "Female",
+    weight: "26 Kg",
+    image: "https://images.unsplash.com/photo-1518717758536-85ae29035b6d?auto=format&fit=crop&w=800&q=80",
+    description: "Molly is a gentle and affectionate Golden Retriever who loves cuddles and outdoor walks. She's the perfect companion for peaceful homes.",
+    traits: ["Gentle", "Affectionate", "Loves cuddles"],
+    highlights: [
+      "Fully vaccinated with a calm and loving personality.",
+      "Great with children and other pets.",
+      "Enjoys long walks and quiet evenings at home."
+    ]
+  },
+  rocky: {
+    name: "Rocky",
+    breed: "Bulldog",
+    age: "4 Years",
+    gender: "Male",
+    weight: "24 Kg",
+    image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&w=800&q=80",
+    description: "Rocky is a calm and loyal Bulldog who loves cozy homes and quiet companionship. He's perfect for families looking for a low-energy, loving pet.",
+    traits: ["Calm", "Loyal", "Low-energy"],
+    highlights: [
+      "Vaccinated and in excellent health.",
+      "Perfect for apartment living or smaller homes.",
+      "Loves relaxing and being around his family."
+    ]
+  }
+};
+
+// Get dog parameter from URL
+const urlParams = new URLSearchParams(window.location.search);
+const dogName = urlParams.get('dog') || 'buddy';
+const dog = dogData[dogName] || dogData.buddy;
+
+// Update page title
+document.title = `${dog.name} - Dog Details | PawFind`;
+
+// Update hero image and badge
+document.querySelector('.hero-image').src = dog.image;
+document.querySelector('.hero-image').alt = dog.name + ' looking happy';
+
+// Update dog name and description
+document.querySelector('.detail-card h1').textContent = dog.name;
+document.querySelector('.detail-card .lead').textContent = dog.description;
+
+// Update eyebrow text
+document.querySelector('.eyebrow').textContent = 'Meet our gentle companion';
+
+// Update traits/pills
+const pillsContainer = document.querySelector('.d-flex.flex-wrap.gap-2.mb-3');
+pillsContainer.innerHTML = dog.traits.map(trait => `<span class="pill">${trait}</span>`).join('');
+
+// Update info tiles
+const infoTiles = document.querySelectorAll('.info-tile');
+infoTiles[0].querySelector('div:last-child').textContent = dog.breed;
+infoTiles[1].querySelector('div:last-child').textContent = dog.age;
+infoTiles[2].querySelector('div:last-child').textContent = dog.gender;
+infoTiles[3].querySelector('div:last-child').textContent = dog.weight;
+
+// Update adopt button
+document.querySelector('.btn-success').textContent = `Adopt ${dog.name}`;
+
+// Update highlights
+const highlightsList = document.querySelector('.feature-list');
+highlightsList.innerHTML = dog.highlights.map(h => `<li>${h}</li>`).join('');
+
+// Update section title
+document.querySelector('.detail-card h3').textContent = `Why ${dog.name} stands out`;
+</script>
+
 </body>
 </html>
