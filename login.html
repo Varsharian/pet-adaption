@@ -258,11 +258,11 @@
     const googleBtn = document.getElementById("googleSignInBtn");
     googleBtn.disabled = true;
 
-    try {
+   try {
       const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-
       await saveUserToFirestore(user.uid, {
         email: user.email,
         displayName: user.displayName,
