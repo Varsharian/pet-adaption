@@ -179,7 +179,8 @@
   import {
     getAuth,
     GoogleAuthProvider,
-    signInWithPopup,
+    signInWithRedirect,
+    getRedirectResult,
     signInWithEmailAndPassword
   } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
   import {
@@ -209,6 +210,7 @@
     }, { merge: true });
   }
 
+  // ---- Email/password login ----
   window.validateLogin = async function () {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value.trim();
@@ -254,42 +256,57 @@
     return false;
   };
 
+  // ---- Google Sign-In via REDIRECT (reliable on mobile & popup-blocked browsers) ----
   window.googleSignIn = async function () {
     const googleBtn = document.getElementById("googleSignInBtn");
     googleBtn.disabled = true;
+    googleBtn.textContent = "Redirecting to Google...";
 
-   try {
+    try {
       const provider = new GoogleAuthProvider();
       provider.setCustomParameters({ prompt: "select_account" });
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      await saveUserToFirestore(user.uid, {
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        loginMethod: "google"
-      });
-
-      localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userEmail", user.email);
-      localStorage.setItem("userName", user.displayName || "");
-
-      window.location.href = "index.html";
+      // Page navigates away here — result is picked up by getRedirectResult below,
+      // after Google sends the browser back to this page.
+      await signInWithRedirect(auth, provider);
     } catch (error) {
-      console.error("Google sign-in failed:", error);
-      if (error.code === "auth/popup-closed-by-user") {
-        // no alert needed
-      } else if (error.code === "auth/unauthorized-domain") {
-        alert("This domain isn't authorized for Google sign-in yet. Add it under Firebase Console → Authentication → Settings → Authorized domains.");
-      } else {
-        alert("Google sign-in failed: " + error.message);
-      }
-    } finally {
+      console.error("Google redirect sign-in failed to start:", error);
+      alert("Could not start Google sign-in: " + error.message);
       googleBtn.disabled = false;
+      googleBtn.textContent = "Sign in with Google";
     }
 
     return false;
   };
+
+  // ---- Catch the result after Google redirects back to this page ----
+  (async function handleRedirectResult() {
+    try {
+      const result = await getRedirectResult(auth);
+      if (result && result.user) {
+        const user = result.user;
+
+        await saveUserToFirestore(user.uid, {
+          email: user.email,
+          displayName: user.displayName,
+          photoURL: user.photoURL,
+          loginMethod: "google"
+        });
+
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userEmail", user.email);
+        localStorage.setItem("userName", user.displayName || "");
+
+        window.location.href = "index.html";
+      }
+    } catch (error) {
+      console.error("Google redirect sign-in failed:", error);
+      if (error.code === "auth/unauthorized-domain") {
+        alert("This domain isn't authorized for Google sign-in yet. Add it under Firebase Console → Authentication → Settings → Authorized domains.");
+      } else if (error.code) {
+        alert("Google sign-in failed: " + error.message);
+      }
+    }
+  })();
 </script>
 
 </body>
