@@ -169,5 +169,98 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="script.js?v=4"></script>
 
+<script type="module">
+  // Import Firebase modules
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+  import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDS1ONYkiCi-17FCPfZpjsXA2Nn_csdx7Q",
+    authDomain: "pet-adoption-ad74b.firebaseapp.com",
+    projectId: "pet-adoption-ad74b",
+    storageBucket: "pet-adoption-ad74b.firebasestorage.app",
+    messagingSenderId: "73451343038",
+    appId: "1:73451343038:web:8c86cf944277fabbd822ef"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Override the validateLogin function to save to Firestore
+  const originalValidateLogin = window.validateLogin;
+  window.validateLogin = async function() {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
+
+    if(email === "" || password === ""){
+        alert("Please enter both email and password");
+        return false;
+    }
+
+    try {
+      // Save user login to Firestore
+      const userDocRef = doc(db, "users", email.replace(/\./g, '_')); // Replace dots for valid Firestore doc ID
+      await setDoc(userDocRef, {
+        email: email,
+        lastLogin: serverTimestamp(),
+        loginMethod: "email"
+      }, { merge: true }); // merge to update existing document
+
+      console.log("User data saved to Firestore!");
+    } catch (error) {
+      console.error("Error saving to Firestore:", error);
+    }
+
+    // Set login status in localStorage
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userEmail", email);
+
+    alert("Login successful! Welcome back to PawFind.");
+    
+    // Redirect to home page after successful login
+    setTimeout(function() {
+        window.location.href = "index.html";
+    }, 500);
+    
+    return false;
+  };
+
+  // Override googleSignIn to save to Firestore
+  window.googleSignIn = async function(){
+    console.log("Google Sign-In button clicked!");
+    
+    const email = "user@gmail.com";
+    
+    try {
+      // Save Google user to Firestore
+      const userDocRef = doc(db, "users", email.replace(/\./g, '_'));
+      await setDoc(userDocRef, {
+        email: email,
+        displayName: "Google User",
+        lastLogin: serverTimestamp(),
+        loginMethod: "google"
+      }, { merge: true });
+
+      console.log("Google user data saved to Firestore!");
+    } catch (error) {
+      console.error("Error saving to Firestore:", error);
+    }
+    
+    // Simple localStorage-based authentication for demo
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userEmail", email);
+    localStorage.setItem("userName", "Google User");
+    
+    alert("Login successful! Welcome to PawFind.");
+    
+    // Direct redirect without setTimeout for faster response
+    window.location.href = "index.html";
+    
+    return false;
+  };
+</script>
+
 </body>
 </html>
