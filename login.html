@@ -67,6 +67,11 @@
   body.dark-mode .login-subtitle {
     color: #9ca3af;
   }
+
+  .btn-outline-secondary:disabled,
+  .btn-warning:disabled {
+    opacity: 0.65;
+  }
 </style>
 </head>
 <body>
@@ -124,7 +129,7 @@
               </label>
             </div>
 
-            <button type="submit" class="btn btn-warning w-100 mb-3 text-white fw-semibold">
+            <button type="submit" id="loginSubmitBtn" class="btn btn-warning w-100 mb-3 text-white fw-semibold">
               Login
             </button>
 
@@ -132,7 +137,7 @@
               <span class="text-muted">or</span>
             </div>
 
-            <button type="button" onclick="googleSignIn()" class="btn btn-outline-secondary w-100 mb-3 d-flex align-items-center justify-content-center gap-2">
+            <button type="button" id="googleSignInBtn" onclick="googleSignIn()" class="btn btn-outline-secondary w-100 mb-3 d-flex align-items-center justify-content-center gap-2">
               <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
                 <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
                 <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
@@ -167,14 +172,23 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="script.js?v=4"></script>
+<script src="script.js?v=5"></script>
 
 <script type="module">
-  // Import Firebase modules
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-  import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+  import {
+    getAuth,
+    GoogleAuthProvider,
+    signInWithPopup,
+    signInWithEmailAndPassword
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 
-  // Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyDS1ONYkiCi-17FCPfZpjsXA2Nn_csdx7Q",
     authDomain: "pet-adoption-ad74b.firebaseapp.com",
@@ -184,80 +198,96 @@
     appId: "1:73451343038:web:8c86cf944277fabbd822ef"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
   const db = getFirestore(app);
 
-  // Override the validateLogin function to save to Firestore
-  const originalValidateLogin = window.validateLogin;
-  window.validateLogin = async function() {
+  async function saveUserToFirestore(uid, data) {
+    await setDoc(doc(db, "users", uid), {
+      ...data,
+      lastLogin: serverTimestamp()
+    }, { merge: true });
+  }
+
+  window.validateLogin = async function () {
     const email = document.getElementById("loginEmail").value.trim();
     const password = document.getElementById("loginPassword").value.trim();
+    const submitBtn = document.getElementById("loginSubmitBtn");
 
-    if(email === "" || password === ""){
-        alert("Please enter both email and password");
-        return false;
+    if (email === "" || password === "") {
+      alert("Please enter both email and password");
+      return false;
     }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Signing in...";
 
     try {
-      // Save user login to Firestore
-      const userDocRef = doc(db, "users", email.replace(/\./g, '_')); // Replace dots for valid Firestore doc ID
-      await setDoc(userDocRef, {
-        email: email,
-        lastLogin: serverTimestamp(),
-        loginMethod: "email"
-      }, { merge: true }); // merge to update existing document
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      const user = result.user;
 
-      console.log("User data saved to Firestore!");
+      await saveUserToFirestore(user.uid, {
+        email: user.email,
+        loginMethod: "email"
+      });
+
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userEmail", user.email);
+
+      window.location.href = "index.html";
     } catch (error) {
-      console.error("Error saving to Firestore:", error);
+      console.error("Email login failed:", error);
+      let message = "Login failed. Please check your email and password.";
+      if (error.code === "auth/user-not-found") {
+        message = "No account found with that email. Please sign up first.";
+      } else if (error.code === "auth/wrong-password") {
+        message = "Incorrect password. Please try again.";
+      } else if (error.code === "auth/invalid-email") {
+        message = "That email address looks invalid.";
+      }
+      alert(message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Login";
     }
 
-    // Set login status in localStorage
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("userEmail", email);
-
-    alert("Login successful! Welcome back to PawFind.");
-    
-    // Redirect to home page after successful login
-    setTimeout(function() {
-        window.location.href = "index.html";
-    }, 500);
-    
     return false;
   };
 
-  // Override googleSignIn to save to Firestore
-  window.googleSignIn = async function(){
-    console.log("Google Sign-In button clicked!");
-    
-    const email = "user@gmail.com";
-    
-    try {
-      // Save Google user to Firestore
-      const userDocRef = doc(db, "users", email.replace(/\./g, '_'));
-      await setDoc(userDocRef, {
-        email: email,
-        displayName: "Google User",
-        lastLogin: serverTimestamp(),
-        loginMethod: "google"
-      }, { merge: true });
+  window.googleSignIn = async function () {
+    const googleBtn = document.getElementById("googleSignInBtn");
+    googleBtn.disabled = true;
 
-      console.log("Google user data saved to Firestore!");
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      await saveUserToFirestore(user.uid, {
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        loginMethod: "google"
+      });
+
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem("userEmail", user.email);
+      localStorage.setItem("userName", user.displayName || "");
+
+      window.location.href = "index.html";
     } catch (error) {
-      console.error("Error saving to Firestore:", error);
+      console.error("Google sign-in failed:", error);
+      if (error.code === "auth/popup-closed-by-user") {
+        // no alert needed
+      } else if (error.code === "auth/unauthorized-domain") {
+        alert("This domain isn't authorized for Google sign-in yet. Add it under Firebase Console → Authentication → Settings → Authorized domains.");
+      } else {
+        alert("Google sign-in failed: " + error.message);
+      }
+    } finally {
+      googleBtn.disabled = false;
     }
-    
-    // Simple localStorage-based authentication for demo
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("userEmail", email);
-    localStorage.setItem("userName", "Google User");
-    
-    alert("Login successful! Welcome to PawFind.");
-    
-    // Direct redirect without setTimeout for faster response
-    window.location.href = "index.html";
-    
+
     return false;
   };
 </script>
