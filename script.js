@@ -90,22 +90,14 @@ function validateSignup(){
 }
 
 function googleSignIn(){
-    console.log("Google Sign-In button clicked!"); // Debug log
-    
-    // Simple localStorage-based authentication for demo
+    console.log("Google Sign-In button clicked!");
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("userEmail", "user@gmail.com");
     localStorage.setItem("userName", "Google User");
-    
     alert("Login successful! Welcome to PawFind.");
-    
-    // Direct redirect without setTimeout for faster response
     window.location.href = "index.html";
-    
     return false;
 }
-    return false;
-}}
 
 function checkAuth(){
     // Get current page filename
