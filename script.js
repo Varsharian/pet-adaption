@@ -90,6 +90,8 @@ function validateSignup(){
 }
 
 function googleSignIn(){
+    console.log("Google Sign-In button clicked!"); // Debug log
+    
     // Simple localStorage-based authentication for demo
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("userEmail", "user@gmail.com");
@@ -100,6 +102,8 @@ function googleSignIn(){
     // Direct redirect without setTimeout for faster response
     window.location.href = "index.html";
     
+    return false;
+}
     return false;
 }}
 
