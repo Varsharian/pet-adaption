@@ -97,10 +97,11 @@ function googleSignIn(){
     
     alert("Login successful! Welcome to PawFind.");
     
-    setTimeout(function() {
-        window.location.href = "index.html";
-    }, 500);
-}
+    // Direct redirect without setTimeout for faster response
+    window.location.href = "index.html";
+    
+    return false;
+}}
 
 function checkAuth(){
     // Get current page filename
